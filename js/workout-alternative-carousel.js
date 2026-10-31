@@ -6,16 +6,31 @@ export function createAlternativeCarousels(root,{getSelected,onSelect,canSelect=
   function cards(viewport){return [...viewport.querySelectorAll('[data-variant-id]')];}
   function selectedIndex(viewport){return Math.max(0,cards(viewport).findIndex(card=>card.dataset.variantId===getSelected(viewport.dataset.alternativeGroup)));}
   function setHeight(viewport){if(canSelect()&&viewport.clientWidth)viewport.style.height=Math.max(0,...cards(viewport).map(card=>card.getBoundingClientRect().height))+'px';}
+  function updateIndicator(viewport){
+    if(!canSelect()||!viewport.clientWidth)return;
+    const options=cards(viewport),nearest=options[centredAlternative(viewport.scrollLeft,viewport.clientWidth,options.length)];
+    if(!nearest)return;
+    const pager=root.querySelector?.(`[data-row-pagination="${viewport.dataset.alternativeGroup}"]`);
+    for(const dot of pager?.querySelectorAll('[data-indicator-id]')||[]){
+      const selected=dot.dataset.indicatorId===nearest.dataset.variantId;
+      if(dot.classList.contains('selected')!==selected){
+        dot.getAnimations?.().forEach(animation=>animation.cancel());
+        dot.classList.toggle('selected',selected);
+      }
+    }
+  }
   async function commit(viewport){
     clearTimeout(timers.get(viewport));timers.delete(viewport);
     if(!canSelect()||!viewport.isConnected||!viewport.clientWidth)return;
+    updateIndicator(viewport);
     const options=cards(viewport),index=centredAlternative(viewport.scrollLeft,viewport.clientWidth,options.length),card=options[index];
     if(!card||card.dataset.variantId===getSelected(viewport.dataset.alternativeGroup))return;
     const accepted=await onSelect(viewport.dataset.alternativeGroup,card.dataset.variantId);
     if(accepted===false&&viewport.isConnected)viewport.scrollTo({left:selectedIndex(viewport)*(viewport.clientWidth+12),behavior:'smooth'});
   }
   root.addEventListener('scroll',event=>{
-    const viewport=event.target;if(!viewport.matches?.('.workout-alternatives'))return;
+    const viewport=event.target;if(!viewport.matches?.('.workout-alternatives')||!canSelect())return;
+    updateIndicator(viewport);
     clearTimeout(timers.get(viewport));timers.set(viewport,setTimeout(()=>commit(viewport),150));
   },true);
   root.addEventListener('keydown',event=>{
