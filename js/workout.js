@@ -19,6 +19,8 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
   let editTail=Promise.resolve(),editFailure=null,newWorkoutId=null;
   let localTail=Promise.resolve(),localFailure=null,localBusy=false,pendingCompletion=null,alternativeTarget=null,exerciseDragging=false;
   let titleMotion=null;
+  let loadingPanel=null,loadingFade=null;
+  const motionAllowed=()=>!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const blockMenu=document.getElementById?.('workout-exercise-menu'),blockEditor=document.getElementById?.('workout-exercise-editor');
   let editingExerciseId=null;
   function closeBlockEditor(){if(blockEditor)blockEditor.hidden=true;editingExerciseId=null;}
@@ -114,12 +116,12 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
     const panel=whole?tracker:tracker.querySelector('.tracker-finished, .tracker-finish-confirm, .tracker-upload')||tracker.querySelector('.tracker-panel');
     await panel?.animate?.([{opacity:1},{opacity:0}],{duration:180,fill:'forwards'}).finished.catch(()=>{});
   }
-  function reset(){closeBlockEditor();if(blockMenu)blockMenu.hidden=true;titleMotion?.animation?.cancel();titleMotion=null;finishRequested=false;alternativeCarousels.reset();alternativeTarget=null;localTail=Promise.resolve();localFailure=null;localBusy=false;pendingCompletion=null;editTail=Promise.resolve();editFailure=null;newWorkoutId=null;exercisePicker?.reset();repsPicker?.close();reorder?.cancel();libraryReorder?.cancel();root.getAnimations?.().forEach(animation=>animation.cancel());transitioning=false;expanded.clear();pickerOpen=false;lastCurrent=null;lastView='library';root.closest('.page')?.classList?.remove?.('workout-detail');epoch++;if(timer)clearInterval(timer);timer=null;owner=null;loaded=false;loading=false;busy=false;visible=false;view='library';pendingCreate=false;templates=[];catalog=[];bests={};session=null;draft=null;history=[];error='';dirty=false;root.innerHTML='';tracker.innerHTML='';tracker.hidden=true;}
+  function reset(){loadingFade?.cancel?.();loadingPanel?.getAnimations?.().forEach(animation=>animation.cancel());loadingFade=null;loadingPanel=null;closeBlockEditor();if(blockMenu)blockMenu.hidden=true;titleMotion?.animation?.cancel();titleMotion=null;finishRequested=false;alternativeCarousels.reset();alternativeTarget=null;localTail=Promise.resolve();localFailure=null;localBusy=false;pendingCompletion=null;editTail=Promise.resolve();editFailure=null;newWorkoutId=null;exercisePicker?.reset();repsPicker?.close();reorder?.cancel();libraryReorder?.cancel();root.getAnimations?.().forEach(animation=>animation.cancel());transitioning=false;expanded.clear();pickerOpen=false;lastCurrent=null;lastView='library';root.closest('.page')?.classList?.remove?.('workout-detail');epoch++;if(timer)clearInterval(timer);timer=null;owner=null;loaded=false;loading=false;busy=false;visible=false;view='library';pendingCreate=false;templates=[];catalog=[];bests={};session=null;draft=null;history=[];error='';dirty=false;root.innerHTML='';tracker.innerHTML='';tracker.hidden=true;}
   async function open(main=false,animateMain=true){
     if(!getUid())return;
     visible=true;
-    if(loaded&&owner===getUid()){if(main&&view!=='library'){if(!await flushEdits())return;await navigate('library',()=>{finishRequested=false;if(session&&!session.startedAt)session=null;newWorkoutId=null;error='';},animateMain);}else render();return;}
     if(loading)return;
+    if(loaded&&owner===getUid()){if(main&&view!=='library'){if(!await flushEdits())return;await navigate('library',()=>{finishRequested=false;if(session&&!session.startedAt)session=null;newWorkoutId=null;error='';},animateMain);}else render();return;}
     owner=getUid();loading=true;error='';render();const generation=epoch;let local=null,localReady=false;
     try{
       local=await localStore.read(owner);localReady=true;if(generation!==epoch)return;
@@ -142,7 +144,15 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
       }
       else error=tr(localReady?'Could not load workouts. Try again.':'Could not read local workout storage. Try again.');
     }}
-    finally{if(generation===epoch){loading=false;if(loaded&&pendingCreate){pendingCreate=false;create();}else render();}}
+    finally{if(generation===epoch){
+      await loadingFade?.finished?.catch(()=>{});
+      if(generation!==epoch)return;
+      if(motionAllowed()){loadingFade=loadingPanel?.animate?.([{opacity:1},{opacity:0}],{duration:180,fill:'forwards'});await loadingFade?.finished?.catch(()=>{});}
+      if(generation!==epoch)return;
+      loadingFade?.cancel?.();loadingFade=null;loadingPanel=null;loading=false;
+      if(loaded&&pendingCreate){pendingCreate=false;await create();}
+      else{lastView=view;render();if(motionAllowed())await root.animate?.([{opacity:0},{opacity:1}],{duration:220}).finished?.catch(()=>{});}
+    }}
   }
   function refresh(){if(loaded)render();exercisePicker.refresh();}
   function disable(disabled){for(const host of [root,tracker])host.querySelectorAll('button,input,select').forEach(el=>el.disabled=disabled||el.dataset?.workoutLocked==='true'||!!(pendingCompletion&&!['library','delete-workout','open','resume','retry-upload','retry-local'].includes(el.dataset?.action)));}
@@ -235,7 +245,14 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
     if(view!==lastView){lastView=view;root.animate?.([{opacity:0},{opacity:1}],{duration:220});}
     if(session?.startedAt&&['set','rest'].includes(session.phase)&&(session.current?.exerciseId!==lastCurrent||session.current?.setId!==lastCurrentSet)){lastCurrent=session.current?.exerciseId;lastCurrentSet=session.current?.setId;if(lastCurrent){const row=exerciseGroup(session.workout,lastCurrent),id=exerciseRowId(row);if(!expanded.has(id))autoExpand=row;expanded.add(id);}}
     const oldScroll=root.closest('.page')?.scrollTop;
-    if(loading){root.innerHTML=`<div class="empty" role="status">${escape(tr('Loading workouts…'))}</div>`;tracker.hidden=true;return;}
+    if(loading){
+      if(!loadingPanel){
+        root.innerHTML=`<div class="workout-page-loading" role="status" aria-label="${escape(tr('Loading workouts…'))}"><span class="workout-upload-spinner" aria-hidden="true"></span></div>`;
+        loadingPanel=root.querySelector('.workout-page-loading');
+        if(motionAllowed())loadingFade=loadingPanel?.animate?.([{opacity:0},{opacity:1}],{duration:180,fill:'both'});
+      }
+      tracker.hidden=true;return;
+    }
     if(!loaded){root.innerHTML=`<p role="alert">${escape(error)}</p>${button('reload','Try again')}`;tracker.hidden=true;return;}
     const alert=error?`<p class="workout-error" role="alert">${escape(error)}</p>${localFailure?button('retry-local','Try again'):editFailure?button('retry-edits','Try again'):''}`:'';
     if(view==='library'){
@@ -623,7 +640,7 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
   root.addEventListener('change',changed);
   tracker.addEventListener('keydown',event=>{if(event.key==='Escape'&&finishRequested){event.preventDefault();finishRequested=false;renderTracker();}});
   document.addEventListener?.('visibilitychange',tick);
-  function create(){if(busy)return;if(!loaded){pendingCreate=true;open();return;}if(session&&!session.startedAt){session=null;dirty=false;}return navigate('editor',()=>{draft={id:uid(),name:'',exercises:[],createdAt:Date.now()};newWorkoutId=draft.id;error='';});}
+  function create(){if(busy)return;if(!loaded||loading){pendingCreate=true;if(!loading)open();return;}if(session&&!session.startedAt){session=null;dirty=false;}return navigate('editor',()=>{draft={id:uid(),name:'',exercises:[],createdAt:Date.now()};newWorkoutId=draft.id;error='';});}
   function setVisible(value){if(!value){finishRequested=false;lastFollowTarget=null;}visible=value;tracker.hidden=!value||!['session','library'].includes(view)||!session?.startedAt;followCurrentSet();}
   globalThis.visualViewport?.addEventListener('resize',followCurrentSet);
   if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>root.style.setProperty('--workout-tracker-height',tracker.getBoundingClientRect().height+'px')).observe(tracker);

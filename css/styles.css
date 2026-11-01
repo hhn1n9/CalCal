@@ -815,6 +815,7 @@
   .workout-detail-actions .workout-header-play:disabled { opacity: .4; }
   .tracker-uploading { height: calc(var(--tracker-display-height) + 60px); display: flex; align-items: center; justify-content: center; }
   .workout-upload-spinner { width: 32px; height: 32px; border: 3px solid #e5e5e5; border-top-color: #000; border-radius: 50%; animation: login-spin 800ms linear infinite; }
+  .workout-page-loading { display: flex; align-items: center; justify-content: center; min-height: max(160px,calc(100dvh - 220px)); }
 
   /* Ongoing set: Figma YT3N2xGGM3yxnotnIaAEdZ, 644 × 387 design coordinates. */
   .workout-tracker.tracker-live { container-type: inline-size; width: calc(100% - 32px); height: auto; aspect-ratio: 644 / 387; padding: 0; border: 0; border-radius: calc(20px * var(--tracker-scale,.745)); background: linear-gradient(179.6249346deg,#000 .53683%,#1a1a1a 25.268%,#474747 99.463%); color: #fff; box-shadow: none; }
