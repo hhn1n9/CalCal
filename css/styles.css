@@ -780,6 +780,9 @@
   .exercise-choice.selected { padding: 0; border: 3px solid #000; color: #000; font-weight: 700; }
   .exercise-picture-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 4 / 5; background: var(--surface2); border-bottom: 1px solid var(--border); color: var(--text3); font-size: 12px; font-weight: 400; }
   .exercise-choice-name { display: block; padding: 12px 8px; width: 100%; font-size: 15px; line-height: 1.25; }
+  .workout-exercise-name, .exercise-choice-name, .tracker-live-title strong, .tracker-exercise strong,
+  .workout-history > div:not(.workout-history-heading) > b, #workout-exercise-edit-name, #picker-custom-name,
+  body:has(#page-workout.active.workout-detail) .compact-drag-preview { text-transform: capitalize; }
   .exercise-choice-check { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #000; color: #fff; }
   .exercise-choice-check img { display: block; filter: invert(1); }
   .exercise-choice-wrap { position: relative; min-width: 0; display: flex; }
