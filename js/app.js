@@ -1,5 +1,5 @@
 import { finishWorkoutInCloud } from './workout-sync.js?v=1.2.43';
-import { createWorkoutFeature } from './workout.js?v=1.2.65';
+import { createWorkoutFeature } from './workout.js?v=1.2.66';
 import { tr, setLanguage, getLanguage, validLanguage, locale } from './i18n.js?v=1.2.61';
 import { calculateSuggestedGoals, activityFactors, roundDailyGoals } from './goal-calculator.js?v=1.2.43';
 import { ageFromBirthday, currentProfileWeight } from './profile-utils.js?v=1.2.43';
@@ -9,6 +9,8 @@ import { createOnboardingTransition } from './onboarding-transition.js?v=1.2.43'
 import { db, doc, getDoc, setDoc, onSnapshot, writeBatch, runTransaction, collection, getDocs, auth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, onAuthStateChanged, signOut } from './firebase.js?v=1.2.43';
 import { scaleNutrient, formatNutrient, sumNutrition } from './nutrition.js?v=1.0.46';
 import { setupPageSwipes } from './page-swipe.js?v=1.2.61';
+import { setupInputEntry } from './input-entry.js?v=1.2.66';
+setupInputEntry(document);
 
 // Shared feedback for all dark grey glass main action buttons.
 document.addEventListener('click',event=>{

@@ -15,8 +15,18 @@ export function targetRepBounds(value){
   return {min,max};
 }
 export function targetReps(value){const bounds=targetRepBounds(value);return bounds?(bounds.min===bounds.max?bounds.min:`${bounds.min}-${bounds.max}`):null;}
-export function trackerRepDefault(value){return targetRepBounds(value)?.min??null;}
-export function newSet(){return {id:uid(),weight:null,reps:null};}
+export function trackerRepDefault(value){return targetRepBounds(value)?.max??null;}
+export function newSet(defaultTargets){return {id:uid(),weight:defaultTargets?.weight??null,reps:defaultTargets?.reps??null,...(defaultTargets?{inheritedTargets:{weight:true,reps:true}}:{})};}
+export function applyExerciseTarget(exercise,setId,field,value){
+  const source=exercise.sets.find(set=>set.id===setId);if(!source||!['weight','reps'].includes(field))return;
+  value=field==='reps'?targetReps(value):optionalNumber(value,'weight');
+  exercise.defaultTargets={weight:source.weight??null,reps:source.reps??null,...exercise.defaultTargets,[field]:value};
+  for(const set of exercise.sets){
+    if(set===source||set[field]==null||set.inheritedTargets?.[field]){
+      set[field]=value;set.inheritedTargets={...set.inheritedTargets,[field]:set!==source};
+    }
+  }
+}
 export function exerciseInstance(exercise){return {id:uid(),exerciseId:exercise.id,name:exercise.name,category:exercise.category,restSeconds:90,sets:[newSet()]};}
 export const exerciseVariants=exercise=>[exercise,...(exercise.alternatives||[])];
 export const exerciseRowId=group=>group.rowId||group.id;
