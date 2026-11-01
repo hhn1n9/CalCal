@@ -788,7 +788,7 @@
   .exercise-choice-menu { position: absolute; top: 38px; right: 4px; z-index: 1; min-width: 110px; padding: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 4px 14px #0002; }
   .exercise-choice-menu button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 4px; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
   .exercise-choice-menu button:hover, .exercise-choice-menu button:focus-visible { background: var(--surface2); }
-  .workout-exercise-menu { position: fixed; z-index: 410; min-width: 150px; right: auto; }
+  .workout-exercise-menu { position: fixed; z-index: 410; min-width: 180px; right: auto; }
   .workout-exercise-menu[hidden] { display: none; }
   .workout-exercise-menu button:disabled { opacity: .4; cursor: default; }
   .workout-exercise-editor { position: fixed !important; z-index: 420 !important; }
@@ -898,7 +898,6 @@
   .workout-alternatives { position: relative; display: flex; align-items: flex-start; gap: 12px; width: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; touch-action: pan-x pan-y; scrollbar-width: none; }
   .workout-alternatives::-webkit-scrollbar { display: none; }
   .workout-alternatives > .workout-variant { flex: 0 0 100%; width: 100%; min-width: 0; padding: 16px; margin: 0; scroll-snap-align: center; scroll-snap-stop: always; }
-  .workout-exercise-heading > .workout-add-alternative { flex-shrink: 0; width: 30px; height: 34px; padding: 6px; justify-content: center; }
   .alternative-pagination { display: flex; justify-content: center; gap: 5px; height: 12px; margin-top: 8px; align-items: center; }
   .alternative-pagination span { width: 4px; height: 4px; background: #d9d9d9; border-radius: 999px; transition: width 220ms ease-in-out, background-color 220ms ease-in-out; }
   .alternative-pagination .selected { width: 14px; background: #676767; }
