@@ -1,10 +1,10 @@
-import {createRepRangeSelector} from './rep-range-selector.js?v=1.2.43';
+import {createRepRangeSelector} from './rep-range-selector.js?v=1.2.67';
 import {alignTrackerClock} from './tracker-clock.js?v=1.2.47';
 import {captureSetLayout,animateSetLayout} from './workout-set-motion.js?v=1.2.54';
 import {currentSetScrollTop} from './workout-set-follow.js?v=1.2.56';
 import {createAlternativeCarousels} from './workout-alternative-carousel.js?v=1.2.64';
 import {setupExerciseReorder} from './workout-exercise-reorder.js?v=1.2.65';
-import {copy,uid,newSet,applyExerciseTarget,exerciseInstance,exerciseVariants,exerciseRowId,removeExerciseFromRow,moveExerciseInRows,allExercises,exerciseGroup,activeExercise,selectAlternative,positions,locate,createSession,nextPosition,startSession,completeSet,advanceRest,extendRest,restProgress,selectSet,validateWorkout,optionalNumber,targetReps,trackerRepDefault} from './workout-model.js?v=1.2.66';
+import {copy,uid,newSet,applyExerciseTarget,exerciseRepRangeDefault,exerciseInstance,exerciseVariants,exerciseRowId,removeExerciseFromRow,moveExerciseInRows,allExercises,exerciseGroup,activeExercise,selectAlternative,positions,locate,createSession,nextPosition,startSession,completeSet,advanceRest,extendRest,restProgress,selectSet,validateWorkout,optionalNumber,targetReps,trackerRepDefault} from './workout-model.js?v=1.2.67';
 import {defaultExercises} from './workout-catalog.js?v=1.2.43';
 import {setupCompactReorder} from './compact-reorder.js?v=1.2.43';
 import {mountRestWheel} from './workout-rest-wheel.js?v=1.2.43';
@@ -447,7 +447,6 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
         if(view==='session'&&!session.pending){const current=locate(session);if(current?.exercise.id===exercise.id&&!session.results[current.set.id]){const currentInput=tracker.querySelector(field==='weight'?'#workout-current-weight':'#workout-current-reps');if(currentInput)currentInput.value=(field==='reps'?trackerRepDefault(current.set.reps):current.set.weight)??'';}}
       }
     }
-    if(['weight','reps'].includes(field))for(const input of root.querySelectorAll(`[data-field="${field}"][data-ex="${el.dataset.ex}"]`)){if(input!==el){const set=allExercises(workout).find(ex=>ex.id===el.dataset.ex)?.sets.find(set=>set.id===input.dataset.set);if(set)input.value=set[field]??'';}}
     saveEdit(field!=='current-weight'&&field!=='current-reps');
   }
   function changed(event,soft=false){
@@ -455,7 +454,7 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
     const count=Number(event.target.value),exercise=allExercises(currentWorkout()).find(ex=>ex.id===event.target.dataset.ex);
     if(!exercise||!Number.isInteger(count)||count<1||count>50){if(!soft){error=tr('Each exercise needs between 1 and 50 sets.');render();}return;}
     const before=captureSetLayout(root.querySelector('[data-set-list="'+exercise.id+'"]'));
-    while(exercise.sets.length<count)exercise.sets.push(newSet({...exercise.sets.at(-1),...exercise.defaultTargets}));
+    while(exercise.sets.length<count)exercise.sets.push(newSet());
     if(exercise.sets.length>count)exercise.sets.length=count;
     repairCurrent();saveEdit();
     const list=root.querySelector('[data-set-list="'+exercise.id+'"]');if(list){list.innerHTML=setRows(exercise,view==='session');animateSetLayout(list,before);}if(view==='session'&&visible)renderTracker();followCurrentSet();
@@ -506,7 +505,7 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
     if(type==='retry-upload'){await finishWorkout();return;}
     if(type==='retry-local'){const failed=localFailure;if(failed){try{await saveLocalRecord(failed.record);}catch{}render();}return;}
     if(type==='retry-edits'){const job=editFailure;if(job){editTail=editTail.then(()=>saveEditSnapshot(job));await editTail;}return;}
-    if(type==='target-reps'){const set=allExercises(workout).find(ex=>ex.id===target.dataset.ex)?.sets.find(item=>item.id===target.dataset.set);if(set)repsPicker.open(set.reps,{ex:target.dataset.ex,set:target.dataset.set,generation:epoch});return;}
+    if(type==='target-reps'){const exercise=allExercises(workout).find(ex=>ex.id===target.dataset.ex),set=exercise?.sets.find(item=>item.id===target.dataset.set);if(set)repsPicker.open(set.reps??exerciseRepRangeDefault(exercise),{ex:target.dataset.ex,set:target.dataset.set,generation:epoch});return;}
     if(type==='toggle-exercise'){toggleExercise(target.dataset.id);return;}
     if(type==='toggle-picker'){alternativeTarget=null;exercisePicker.open(catalog);return;}
     if(type==='add-alternative'){const group=exerciseGroup(workout,target.dataset.id);if(group){alternativeTarget=exerciseRowId(group);exercisePicker.open(catalog);}return;}
@@ -531,7 +530,7 @@ export function createWorkoutFeature({root,tracker,getUid,store,tr,localStore=cr
       await navigate('session',()=>{session=createSession(templates.find(item=>item.id===target.dataset.id));dirty=false;error='';});return;
     }
     if(type==='add-exercise'){const ex=catalog.find(item=>item.id===target.dataset.id);if(ex){workout.exercises.push(exerciseInstance(ex));repairCurrent();saveEdit();render();}return;}
-    if(type==='add-set'){const ex=allExercises(workout).find(item=>item.id===target.dataset.ex);if(ex&&ex.sets.length<50){const before=captureSetLayout(root.querySelector('[data-set-list="'+ex.id+'"]'));ex.sets.push(newSet({...ex.sets.at(-1),...ex.defaultTargets}));repairCurrent();saveEdit();render();animateSetLayout(root.querySelector('[data-set-list="'+ex.id+'"]'),before);}return;}
+    if(type==='add-set'){const ex=allExercises(workout).find(item=>item.id===target.dataset.ex);if(ex&&ex.sets.length<50){const before=captureSetLayout(root.querySelector('[data-set-list="'+ex.id+'"]'));ex.sets.push(newSet());repairCurrent();saveEdit();render();animateSetLayout(root.querySelector('[data-set-list="'+ex.id+'"]'),before);}return;}
     if(type==='remove-exercise'){
       if(blockMenu)blockMenu.hidden=true;
       const group=exerciseGroup(workout,target.dataset.id);if(!group)return;

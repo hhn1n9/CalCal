@@ -13,13 +13,13 @@
 <title>CalCal Food Tracker</title>
 <link rel="stylesheet" href="./css/colors.css?v=1.2.43">
 <link rel="stylesheet" href="./css/fonts.css?v=1.2.43">
-<link rel="stylesheet" href="./css/styles.css?v=1.2.66">
+<link rel="stylesheet" href="./css/styles.css?v=1.2.67">
 </head>
 <body class="signed-out">
 <main id="login-screen" class="login-screen">
   <div class="login-panel">
     <img class="login-logo" src="./assets/logo_transparent.png?v=1.2.43" width="160" height="160" alt="CalCal">
-    <small class="login-version">v1.2.66</small>
+    <small class="login-version">v1.2.67</small>
     <div class="login-actions">
     <div class="login-methods">
     <form id="email-login-form" class="email-login-form" onsubmit="signInEmail(event)">
@@ -344,15 +344,15 @@
   <div class="modal bottom-sheet rep-range-selector">
 
     <div class="bottom-sheet-header"><div class="modal-title" id="rep-range-title" data-i18n="Target reps">Target reps</div><button type="button" class="btn-icon bottom-sheet-close" data-rep-action="cancel" aria-label="Close" data-i18n-aria-label="Close"><img src="./assets/icons/close.svg?v=1.2.43" width="24" height="24" alt=""></button></div><div class="bottom-sheet-body">
-    <output id="rep-range-value" class="rep-range-value">8–12</output>
+    <div id="rep-range-value" class="rep-range-value rep-range-inputs">
+      <input id="rep-input-min" type="number" inputmode="decimal" min="0" max="10000" step="1" aria-label="Minimum reps" data-i18n-aria-label="Minimum reps">
+      <span class="rep-range-dash" aria-hidden="true">–</span>
+      <input id="rep-input-max" type="number" inputmode="decimal" min="0" max="10000" step="1" aria-label="Maximum reps" data-i18n-aria-label="Maximum reps">
+    </div>
     <div class="rep-range-sliders">
       <div class="rep-range-track"></div>
       <input id="rep-range-min" class="rep-range-min" type="range" min="0" max="50" step="1" aria-label="Minimum reps" data-i18n-aria-label="Minimum reps">
       <input id="rep-range-max" class="rep-range-max" type="range" min="0" max="50" step="1" aria-label="Maximum reps" data-i18n-aria-label="Maximum reps">
-    </div>
-    <div class="rep-range-inputs">
-      <label><span data-i18n="Minimum reps">Minimum reps</span><input id="rep-input-min" type="number" inputmode="decimal" min="0" max="10000" step="1"></label>
-      <label><span data-i18n="Maximum reps">Maximum reps</span><input id="rep-input-max" type="number" inputmode="decimal" min="0" max="10000" step="1"></label>
     </div>
     <p id="rep-range-error" class="workout-error" role="alert"></p>
     <button type="button" class="rep-range-clear" data-rep-action="clear" data-i18n="Clear target">Clear target</button>
@@ -468,7 +468,7 @@
 </nav>
 
 <!-- Firebase SDK -->
-<script type="module" src="./js/app.js?v=1.2.66"></script>
+<script type="module" src="./js/app.js?v=1.2.67"></script>
 <script type="module" src="./js/earth-background.js?v=1.2.43"></script>
 </body>
 </html>
