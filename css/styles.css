@@ -711,7 +711,7 @@
   /* Shared circular header actions. */
   .btn-icon.glass-circle { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 10px; border-radius: 50%; border: 1px solid rgba(255,255,255,.65); background: rgba(135,135,135,.6); box-shadow: 0 3px 12px #0001, inset 0 1px 0 #ffffff80; -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); }
   .glass-circle img { display: block; object-fit: contain; filter: none; }
-  #page-workout > .page-header { justify-content: flex-end; }
+  #page-workout > .page-header { justify-content: space-between; }
   .workout-detail-header { gap: 10px; flex-wrap: wrap; }
   .workout-name-row { display: flex; align-items: center; gap: 10px; flex: 1 1 180px; min-width: 0; }
   .workout-detail-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }

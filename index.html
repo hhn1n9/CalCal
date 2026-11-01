@@ -13,13 +13,13 @@
 <title>CalCal Food Tracker</title>
 <link rel="stylesheet" href="./css/colors.css?v=1.2.43">
 <link rel="stylesheet" href="./css/fonts.css?v=1.2.43">
-<link rel="stylesheet" href="./css/styles.css?v=1.2.68">
+<link rel="stylesheet" href="./css/styles.css?v=1.2.69">
 </head>
 <body class="signed-out">
 <main id="login-screen" class="login-screen">
   <div class="login-panel">
     <img class="login-logo" src="./assets/logo_transparent.png?v=1.2.43" width="160" height="160" alt="CalCal">
-    <small class="login-version">v1.2.68</small>
+    <small class="login-version">v1.2.69</small>
     <div class="login-actions">
     <div class="login-methods">
     <form id="email-login-form" class="email-login-form" onsubmit="signInEmail(event)">
@@ -135,6 +135,7 @@
 <!-- WORKOUT PAGE -->
 <div id="page-workout" class="page">
   <div class="page-header">
+    <div class="page-title workout-page-title" data-i18n="Workout">Workout</div>
     <div class="workout-header-actions">
       <button class="btn-icon workout-history-button" onclick="openWorkoutHistory()" aria-label="Workout history" data-i18n-aria-label="Workout history" title="Workout history" data-i18n-title="Workout history"><img src="./assets/history.png" width="22" height="22" alt=""></button>
       <button class="btn-icon glass-circle main-action-button" onclick="createWorkout()" aria-label="Add workout" data-i18n-aria-label="Add workout"><img src="./assets/icons/add.svg?v=1.2.43" width="26" height="26" alt=""></button>
@@ -468,7 +469,7 @@
 </nav>
 
 <!-- Firebase SDK -->
-<script type="module" src="./js/app.js?v=1.2.68"></script>
+<script type="module" src="./js/app.js?v=1.2.69"></script>
 <script type="module" src="./js/earth-background.js?v=1.2.43"></script>
 </body>
 </html>
