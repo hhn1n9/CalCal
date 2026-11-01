@@ -1,4 +1,4 @@
-import {createRepRangeSelector} from './rep-range-selector.js?v=1.2.67';
+import {createRepRangeSelector} from './rep-range-selector.js?v=1.2.68';
 import {alignTrackerClock} from './tracker-clock.js?v=1.2.47';
 import {captureSetLayout,animateSetLayout} from './workout-set-motion.js?v=1.2.54';
 import {currentSetScrollTop} from './workout-set-follow.js?v=1.2.56';

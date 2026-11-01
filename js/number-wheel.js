@@ -27,15 +27,19 @@ export function createNumberWheel(input,viewport,{min,max,step=1,initial}){
     viewport.setAttribute('aria-valuetext',valueAt(index).toFixed(decimals));
   }
   function commit(next,notify=true){
+    input.dataset??={};
     index=Math.max(0,Math.min(count-1,next));
     const value=valueAt(index).toFixed(decimals),changed=input.value!==value;
+    if(notify&&changed)delete input.dataset.systemDefault;
     input.value=value;render();
     if(notify&&changed)input.dispatchEvent(new Event('input',{bubbles:true}));
   }
   function sync(){
     clearTimeout(timer);editing=false;editor.hidden=true;
+    const systemDefault=input.value===''||input.dataset?.systemDefault===String(input.value);
     const value=input.value===''?initial:Number(input.value);
     commit(wheelIndex(value,min,max,step),false);
+    if(systemDefault)input.dataset.systemDefault=String(input.value);else delete input.dataset.systemDefault;
     viewport.scrollTop=index*ROW;
   }
   function flush(){
@@ -46,14 +50,14 @@ export function createNumberWheel(input,viewport,{min,max,step=1,initial}){
   }
   function startEditing(){
     clearTimeout(timer);editing=true;
-    editor.value=input.value;editor.hidden=false;
+    editor.value=input.dataset?.systemDefault===String(input.value)?'':input.value;editor.hidden=false;
     editor.focus({preventScroll:true});editor.select();
   }
   function finishEditing(save=true){
     if(!editing)return;
     editing=false;
     const text=editor.value.trim().replace(',','.');
-    if(save&&text!==''&&Number.isFinite(Number(text)))commit(wheelIndex(Number(text),min,max,step));
+    if(save&&text!==''&&Number.isFinite(Number(text))){delete input.dataset.systemDefault;commit(wheelIndex(Number(text),min,max,step));}
     editor.hidden=true;viewport.scrollTop=index*ROW;
   }
   editor.addEventListener('blur',()=>finishEditing());

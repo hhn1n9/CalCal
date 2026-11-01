@@ -1,15 +1,15 @@
 import { finishWorkoutInCloud } from './workout-sync.js?v=1.2.43';
-import { createWorkoutFeature } from './workout.js?v=1.2.67';
+import { createWorkoutFeature } from './workout.js?v=1.2.68';
 import { tr, setLanguage, getLanguage, validLanguage, locale } from './i18n.js?v=1.2.61';
 import { calculateSuggestedGoals, activityFactors, roundDailyGoals } from './goal-calculator.js?v=1.2.43';
 import { ageFromBirthday, currentProfileWeight } from './profile-utils.js?v=1.2.43';
 import { setupOnboardingSwipes } from './onboarding-swipe.js?v=1.2.43';
-import { createNumberWheel } from './number-wheel.js?v=1.2.43';
+import { createNumberWheel } from './number-wheel.js?v=1.2.68';
 import { createOnboardingTransition } from './onboarding-transition.js?v=1.2.43';
 import { db, doc, getDoc, setDoc, onSnapshot, writeBatch, runTransaction, collection, getDocs, auth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, onAuthStateChanged, signOut } from './firebase.js?v=1.2.43';
 import { scaleNutrient, formatNutrient, sumNutrition } from './nutrition.js?v=1.0.46';
 import { setupPageSwipes } from './page-swipe.js?v=1.2.61';
-import { setupInputEntry } from './input-entry.js?v=1.2.66';
+import { setupInputEntry, setInputValue } from './input-entry.js?v=1.2.68';
 setupInputEntry(document);
 
 // Shared feedback for all dark grey glass main action buttons.
@@ -466,7 +466,7 @@ window.updateGoalActivity=()=>{
   document.getElementById('g-activity-description').textContent=tr(picture[2]);
 };
 window.openGoalModal=()=>{
-  for(const key of ['cal','protein','carbs','fat'])document.getElementById('g-'+key).value=state.goals[key]??'';
+  for(const key of ['cal','protein','carbs','fat'])setInputValue(document.getElementById('g-'+key),state.goals[key]??'');
   document.getElementById('g-activity').value=Object.hasOwn(activityFactors,state.bodyProfile.activity)?state.bodyProfile.activity:'sedentary';
   const goal=['gain','lose','maintain'].includes(state.bodyProfile.goal)?state.bodyProfile.goal:'maintain';
   document.getElementById('g-fitness-goal').value=goal;
@@ -485,7 +485,7 @@ window.reEvaluateGoals=()=>{
   try{
     const activity=document.getElementById('g-activity').value,goal=document.getElementById('g-fitness-goal').value;
     const suggestion=calculateSuggestedGoals({...stats,activity,goal});
-    for(const key of ['cal','protein','carbs','fat'])document.getElementById('g-'+key).value=suggestion[key];
+    for(const key of ['cal','protein','carbs','fat'])setInputValue(document.getElementById('g-'+key),suggestion[key],{systemDefault:true});
     goalEvaluation={...stats,activity,goal,bmr:suggestion.bmr,tdee:suggestion.tdee,formula:'Mifflin-St Jeor'};
     return true;
   }catch(err){error.textContent=tr(err.message);return false;}
@@ -496,7 +496,7 @@ window.roundHomeGoals=()=>{
   if(!document.getElementById('daily-goals-form').reportValidity())return false;
   try{
     const rounded=roundDailyGoals(Object.fromEntries(['cal','protein','carbs','fat'].map(key=>[key,Number(document.getElementById('g-'+key).value)])));
-    for(const key of ['cal','protein','carbs','fat'])document.getElementById('g-'+key).value=rounded[key];return true;
+    for(const key of ['cal','protein','carbs','fat'])setInputValue(document.getElementById('g-'+key),rounded[key]);return true;
   }catch(err){error.textContent=tr(err.message);return false;}
 };
 window.saveGoals=async()=>{
@@ -518,7 +518,7 @@ window.saveGoals=async()=>{
   }catch(err){if(generation===accountGeneration)error.textContent=tr('Could not save goals. Please try again.');return false;}
   finally{if(generation===accountGeneration){savingGoalSettings=false;document.getElementById('g-save').disabled=false;}}
 };
-window.openWaterGoalModal=()=>{document.getElementById('g-water-ml').value=state.goals.waterMl||2000;document.getElementById('water-goal-error').textContent='';openModal('modal-water-goal');};
+window.openWaterGoalModal=()=>{setInputValue(document.getElementById('g-water-ml'),state.goals.waterMl||2000,{systemDefault:!state.goals.waterMl});document.getElementById('water-goal-error').textContent='';openModal('modal-water-goal');};
 window.openSupplementGoalModal=()=>{document.getElementById('g-supps').value=(state.goals.supps||[]).join(', ');document.getElementById('supplement-goal-error').textContent='';openModal('modal-supplement-goal');};
 async function saveCardGoal(kind,patch){
   if(!state.user||!accountReady||savingGoalSettings)return false;
@@ -672,7 +672,7 @@ window._openServe=id=>{
   state._serveFood=f;
   document.getElementById('serve-food-name').textContent=f.name;
   document.getElementById('serve-food-info').textContent=`${tr("Per serving (1x):")} ${formatNutrient(f.cal)} kcal · ${tr("Protein")} ${formatNutrient(f.protein)}g · ${tr("Carbs")} ${formatNutrient(f.carbs)}g · ${tr("Fat")} ${formatNutrient(f.fat)}g ${tr("(— means unavailable)")}`;
-  document.getElementById('serve-qty').value=1;
+  setInputValue(document.getElementById('serve-qty'),1,{systemDefault:true});
   updateServePreview();
   openModal('modal-serve');
   document.getElementById('serve-qty').oninput=updateServePreview;
@@ -899,7 +899,7 @@ window.onboardingNext=()=>{
       onboardingSuggestion=calculateSuggestedGoals({...onboardingStats,activity:document.getElementById('setup-activity').value,goal});
       document.getElementById('setup-bmr').textContent=onboardingSuggestion.bmr+' kcal';
       document.getElementById('setup-tdee').textContent=onboardingSuggestion.tdee+' kcal';
-      for(const key of ['cal','protein','carbs','fat'])document.getElementById('setup-'+key).value=onboardingSuggestion[key];
+      for(const key of ['cal','protein','carbs','fat'])setInputValue(document.getElementById('setup-'+key),onboardingSuggestion[key],{systemDefault:true});
     }catch(err){showOnboardingError(err.message);return;}
   }
   showOnboardingStep(Math.min(3,onboardingStep+1));
@@ -910,7 +910,7 @@ window.roundOnboardingGoals=()=>{
   if(!document.getElementById('onboarding-review-form').reportValidity())return;
   try{
     const goals=roundDailyGoals(Object.fromEntries(['cal','protein','carbs','fat'].map(key=>[key,Number(document.getElementById('setup-'+key).value)])));
-    for(const key of ['cal','protein','carbs','fat'])document.getElementById('setup-'+key).value=goals[key];
+    for(const key of ['cal','protein','carbs','fat'])setInputValue(document.getElementById('setup-'+key),goals[key]);
   }catch(err){showOnboardingError(err.message);}
 };
 window.completeOnboarding=async useSuggested=>{
