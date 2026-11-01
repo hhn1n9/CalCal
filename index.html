@@ -13,13 +13,13 @@
 <title>CalCal Food Tracker</title>
 <link rel="stylesheet" href="./css/colors.css?v=1.2.43">
 <link rel="stylesheet" href="./css/fonts.css?v=1.2.43">
-<link rel="stylesheet" href="./css/styles.css?v=1.2.72">
+<link rel="stylesheet" href="./css/styles.css?v=1.2.73">
 </head>
 <body class="signed-out">
 <main id="login-screen" class="login-screen">
   <div class="login-panel">
     <img class="login-logo" src="./assets/logo_transparent.png?v=1.2.43" width="160" height="160" alt="CalCal">
-    <small class="login-version">v1.2.72</small>
+    <small class="login-version">v1.2.73</small>
     <div class="login-actions">
     <div class="login-methods">
     <form id="email-login-form" class="email-login-form" onsubmit="signInEmail(event)">
@@ -344,7 +344,8 @@
 <div id="modal-target-reps" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rep-range-title">
   <div class="modal bottom-sheet rep-range-selector">
 
-    <div class="bottom-sheet-header"><div class="modal-title" id="rep-range-title" data-i18n="Target reps">Target reps</div><button type="button" class="btn-icon bottom-sheet-close" data-rep-action="cancel" aria-label="Close" data-i18n-aria-label="Close"><img src="./assets/icons/close.svg?v=1.2.43" width="24" height="24" alt=""></button></div><div class="bottom-sheet-body">
+    <div class="bottom-sheet-header"><div class="modal-title" id="rep-range-title" data-i18n="Target reps">Target reps</div><div class="rep-range-header-actions"><button type="button" class="btn-icon" data-rep-action="failure" aria-label="Until Failure" data-i18n-aria-label="Until Failure" title="Until Failure" data-i18n-title="Until Failure"><img src="./assets/icons/until-failure.svg?v=1.2.73" width="24" height="24" alt=""></button><button type="button" class="btn-icon" data-rep-action="time" aria-label="Use time target" data-i18n-aria-label="Use time target" aria-pressed="false"><img src="./assets/icons/clock.svg?v=1.2.73" width="24" height="24" alt=""></button><button type="button" class="btn-icon bottom-sheet-close" data-rep-action="cancel" aria-label="Close" data-i18n-aria-label="Close"><img src="./assets/icons/close.svg?v=1.2.43" width="24" height="24" alt=""></button></div></div><div class="bottom-sheet-body">
+    <div data-rep-numeric>
     <div id="rep-range-value" class="rep-range-value rep-range-inputs">
       <input id="rep-input-min" type="number" inputmode="decimal" min="0" max="10000" step="1" aria-label="Minimum reps" data-i18n-aria-label="Minimum reps">
       <span class="rep-range-dash" aria-hidden="true">–</span>
@@ -354,6 +355,13 @@
       <div class="rep-range-track"></div>
       <input id="rep-range-min" class="rep-range-min" type="range" min="0" max="26" step="1" aria-label="Minimum reps" data-i18n-aria-label="Minimum reps">
       <input id="rep-range-max" class="rep-range-max" type="range" min="0" max="26" step="1" aria-label="Maximum reps" data-i18n-aria-label="Maximum reps">
+    </div>
+    </div>
+    <div class="rep-failure-target" data-rep-failure hidden><strong data-i18n="Until Failure">Until Failure</strong><button type="button" class="rep-range-clear" data-rep-action="reps" data-i18n="Use rep target">Use rep target</button></div>
+    <div class="rep-duration-wheels" data-rep-time hidden>
+      <div><label id="target-minutes-label" data-i18n="Minutes">Minutes</label><div class="number-wheel-frame"><input id="target-time-minutes" type="number" inputmode="decimal" min="0" max="999" hidden><div id="target-minutes-wheel" class="number-wheel" role="spinbutton" tabindex="0" aria-labelledby="target-minutes-label"></div></div></div>
+      <span class="rep-duration-colon" aria-hidden="true">:</span>
+      <div><label id="target-seconds-label" data-i18n="Seconds">Seconds</label><div class="number-wheel-frame"><input id="target-time-seconds" type="number" inputmode="decimal" min="0" max="59" hidden><div id="target-seconds-wheel" class="number-wheel" role="spinbutton" tabindex="0" aria-labelledby="target-seconds-label"></div></div></div>
     </div>
     <p id="rep-range-error" class="workout-error" role="alert"></p>
     <button type="button" class="rep-range-clear" data-rep-action="clear" data-i18n="Clear target">Clear target</button>
@@ -469,7 +477,7 @@
 </nav>
 
 <!-- Firebase SDK -->
-<script type="module" src="./js/app.js?v=1.2.72"></script>
+<script type="module" src="./js/app.js?v=1.2.73"></script>
 <script type="module" src="./js/earth-background.js?v=1.2.43"></script>
 </body>
 </html>

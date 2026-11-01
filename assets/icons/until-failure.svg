@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width=".85" stroke-linecap="round" stroke-linejoin="round">
+  <title>Until failure</title>
+  <g transform="translate(4.25 4)">
+    <path d="M0 2v3a1.25 1.25 0 0 0 2.5 0V2m2 4V2h1.25A1.25 1.25 0 0 1 7 3.25V6m2-6v5a1 1 0 0 0 1 1h.5M8 2h2.5M12.5 2v4m0-6v.1m3-.1v6"/>
+  </g>
+  <g transform="translate(1 14)">
+    <path d="M0 6V1.25A1.25 1.25 0 0 1 1.25 0H2M0 2h2m4 0H5a1.5 1.5 0 0 0-1.5 1.5v1A1.5 1.5 0 0 0 5 6h1V2m2 0v4m0-6v.1M10 0v6m2-4v2.75A1.25 1.25 0 0 0 13.25 6h1.25V2m2 4V3.25A1.25 1.25 0 0 1 17.75 2H18m4 4h-1.25A1.25 1.25 0 0 1 19.5 4.75v-1.5A1.25 1.25 0 0 1 20.75 2h0A1.25 1.25 0 0 1 22 3.25V4h-2.5"/>
+  </g>
+</svg>

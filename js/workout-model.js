@@ -8,14 +8,31 @@ export function optionalNumber(value,kind){
 }
 export function targetRepBounds(value){
   if(value===null||value===undefined||String(value).trim()==='')return null;
+  if(value==='UF'||value?.type==='time')return null;
   const match=String(value).trim().match(/^(\d+)\s*(?:[-–—]\s*(\d+))?$/);
   if(!match)throw Error('Enter a whole-number rep target or range.');
   const min=Number(match[1]),max=Number(match[2]??match[1]);
   if(min>max||max>10000)throw Error('Enter a valid rep range (minimum ≤ maximum).');
   return {min,max};
 }
-export function targetReps(value){const bounds=targetRepBounds(value);return bounds?(bounds.min===bounds.max?bounds.min:`${bounds.min}-${bounds.max}`):null;}
-export function trackerRepDefault(value){return targetRepBounds(value)?.max??null;}
+export function durationSeconds(value){
+  if(value==null||String(value).trim()==='')return null;
+  const text=String(value).trim(),match=text.match(/^(\d{1,3}):([0-5]\d)$/);
+  const seconds=match?Number(match[1])*60+Number(match[2]):/^\d+$/.test(text)?Number(text):NaN;
+  if(!Number.isInteger(seconds)||seconds<0||seconds>59999)throw Error('Enter a valid duration (minutes:seconds).');
+  return seconds;
+}
+export function formatDuration(value){return value==null?'':String(Math.floor(value/60)).padStart(2,'0')+':'+String(value%60).padStart(2,'0');}
+export function targetReps(value){
+  if(typeof value==='string'&&/^(UF|Until Failure)$/i.test(value.trim()))return 'UF';
+  if(value&&typeof value==='object'){
+    if(value.type!=='time')throw Error('Enter a valid target.');
+    const seconds=durationSeconds(value.seconds);if(seconds===null)throw Error('Enter a valid duration (minutes:seconds).');
+    return {type:'time',seconds};
+  }
+  const bounds=targetRepBounds(value);return bounds?(bounds.min===bounds.max?bounds.min:`${bounds.min}-${bounds.max}`):null;
+}
+export function trackerRepDefault(value){return value==='UF'?'UF':value?.type==='time'?formatDuration(value.seconds):targetRepBounds(value)?.max??null;}
 export function newSet(){return {id:uid(),weight:null,reps:null};}
 export function exerciseRepRangeDefault(exercise){return exercise.repRangeDefault??exercise.defaultTargets?.reps??exercise.sets.find(set=>set.reps!=null)?.reps??null;}
 export function applyExerciseTarget(exercise,setId,field,value){
@@ -86,8 +103,11 @@ export function startSession(session,now=Date.now()){
 export function completeSet(session,weight,reps,best={},now=Date.now()){
   const current=locate(session);
   if(!current||!session.startedAt||session.phase!=='set')throw Error('Start the workout before logging a set.');
-  weight=optionalNumber(weight,'weight');reps=optionalNumber(reps,'reps');
-  session.results[current.set.id]={exerciseId:current.exercise.exerciseId,name:current.exercise.name,weight,reps,completedAt:now};
+  weight=optionalNumber(weight,'weight');let extra={};
+  if(current.set.reps?.type==='time'){extra={targetType:'time',durationSeconds:durationSeconds(reps)};reps=null;}
+  else if(current.set.reps==='UF'){extra={targetType:'failure'};reps=/^UF$/i.test(String(reps).trim())?null:optionalNumber(reps,'reps');}
+  else reps=optionalNumber(reps,'reps');
+  session.results[current.set.id]={exerciseId:current.exercise.exerciseId,name:current.exercise.name,weight,reps,...extra,completedAt:now};
   const updated=copy(best);updated.byWeight??={};
   if(weight!==null&&reps!==null){
     updated.bestWeight=Math.max(updated.bestWeight??0,weight);

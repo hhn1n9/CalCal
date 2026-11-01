@@ -1,11 +1,25 @@
-import {targetRepBounds,targetReps} from './workout-model.js?v=1.2.67';
+import {targetRepBounds,targetReps} from './workout-model.js?v=1.2.73';
 import {setInputValue} from './input-entry.js?v=1.2.68';
+import {createNumberWheel} from './number-wheel.js?v=1.2.68';
 export function repSliderValue(index){index=Math.max(0,Math.min(26,Math.round(Number(index)||0)));return index<=20?index:20+(index-20)*5;}
 export function repSliderIndex(value){value=Math.max(0,Math.min(50,Number(value)||0));return value<=20?Math.round(value):20+Math.round((value-20)/5);}
-export function createRepRangeSelector(element,{tr,onApply}){
+export function createRepRangeSelector(element,{tr,onApply,mountWheel=createNumberWheel}){
   if(!element)return {open(){},close(){}};
   const low=element.querySelector('#rep-range-min'),high=element.querySelector('#rep-range-max'),min=element.querySelector('#rep-input-min'),max=element.querySelector('#rep-input-max'),output=element.querySelector('#rep-range-value'),error=element.querySelector('#rep-range-error'),sliders=element.querySelector('.rep-range-sliders');
-  let context=null,returnFocus=null,single=false,gesture=null;
+  const numeric=element.querySelector('[data-rep-numeric]'),timed=element.querySelector('[data-rep-time]'),minutes=element.querySelector('#target-time-minutes'),seconds=element.querySelector('#target-time-seconds'),clock=element.querySelector('[data-rep-action="time"]');
+  let context=null,returnFocus=null,single=false,gesture=null,mode='reps',wheels=null;
+  function setMode(next){
+    mode=next;numeric.hidden=mode!=='reps';timed.hidden=mode!=='time';
+    element.querySelector('[data-rep-failure]').hidden=mode!=='failure';
+    element.querySelector('[data-rep-action="failure"]').setAttribute?.('aria-pressed',String(mode==='failure'));
+    element.querySelector('#rep-range-title').textContent=tr(mode==='time'?'Time target':mode==='failure'?'Target':'Target reps');
+    clock.setAttribute?.('aria-pressed',String(mode==='time'));clock.setAttribute?.('aria-label',tr(mode==='time'?'Use rep target':'Use time target'));
+    error.textContent='';
+    if(mode==='time'){
+      wheels??=[mountWheel(minutes,element.querySelector('#target-minutes-wheel'),{min:0,max:999,initial:1}),mountWheel(seconds,element.querySelector('#target-seconds-wheel'),{min:0,max:59,initial:0})];
+      wheels.forEach(wheel=>wheel.sync());
+    }
+  }
   function render(){
     const a=Number(min.value),b=Number(max.value),left=repSliderIndex(a),right=repSliderIndex(b);
     single=min.value!==''&&max.value!==''&&a===b;
@@ -15,10 +29,16 @@ export function createRepRangeSelector(element,{tr,onApply}){
     sliders.style.setProperty('--range-left',(left/26*100)+'%');sliders.style.setProperty('--range-right',(right/26*100)+'%');sliders.classList.toggle('same',single);
   }
   function close(){element.classList.remove('open');context=null;gesture=null;returnFocus?.focus?.({preventScroll:true});returnFocus=null;}
-  function open(value,next){context=next;returnFocus=document.activeElement;const bounds=targetRepBounds(value)||{min:8,max:12};setInputValue(min,bounds.min,{systemDefault:value==null});setInputValue(max,bounds.max,{systemDefault:value==null});error.textContent='';render();element.classList.add('open');}
-  function apply(clear=false){
+  function open(value,next){
+    context=next;returnFocus=document.activeElement;const savedBounds=targetRepBounds(value),bounds=savedBounds||{min:8,max:12},duration=value?.type==='time'?value.seconds:60;
+    setInputValue(min,bounds.min,{systemDefault:!savedBounds});setInputValue(max,bounds.max,{systemDefault:!savedBounds});
+    setInputValue(minutes,Math.floor(duration/60),{systemDefault:value?.type!=='time'});setInputValue(seconds,duration%60,{systemDefault:value?.type!=='time'});
+    error.textContent='';render();element.classList.add('open');setMode(value==='UF'?'failure':value?.type==='time'?'time':'reps');
+  }
+  function apply(clear=false,forced=null){
     try{
-      const value=clear?null:targetReps(min.value===''&&max.value===''?null:min.value===max.value?min.value:`${min.value}-${max.value}`);
+      if(mode==='time'&&!clear&&!forced)wheels.forEach(wheel=>wheel.flush());
+      const value=clear?null:forced||targetReps(mode==='failure'?'UF':mode==='time'?{type:'time',seconds:Number(minutes.value)*60+Number(seconds.value)}:min.value===''&&max.value===''?null:min.value===max.value?min.value:`${min.value}-${max.value}`);
       onApply(value,context);close();
     }catch(err){error.textContent=tr(err.message);}
   }
@@ -41,7 +61,7 @@ export function createRepRangeSelector(element,{tr,onApply}){
       if(!direction)return;event.preventDefault();input.value=String(Math.max(0,Math.min(26,Number(input.value)+direction)));move();
     });
   }
-  element.addEventListener('click',event=>{const action=event.target.closest('[data-rep-action]')?.dataset.repAction;if(action==='cancel'||event.target===element)close();else if(action==='save')apply();else if(action==='clear')apply(true);});
+  element.addEventListener('click',event=>{const action=event.target.closest('[data-rep-action]')?.dataset.repAction;if(action==='cancel'||event.target===element)close();else if(action==='save')apply();else if(action==='clear')apply(true);else if(action==='failure')apply(false,'UF');else if(action==='time')setMode(mode==='time'?'reps':'time');else if(action==='reps')setMode('reps');});
   element.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();}if(event.key==='Enter'&&event.target.matches('input[type="number"]')){event.preventDefault();apply();}});
   return {open,close};
 }

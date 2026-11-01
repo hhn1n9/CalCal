@@ -626,6 +626,18 @@
   .rep-range-inputs input:focus { outline: none; border-bottom-color: #000; }
   .rep-range-clear { display: block; margin: 14px auto 22px; border: 0; padding: 4px; background: none; text-decoration: underline; color: var(--text2); cursor: pointer; }
   .rep-range-selector .workout-error:empty { display: none; }
+  .rep-range-selector .bottom-sheet-header { padding-inline: 112px; }
+  .rep-range-header-actions { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 2px; }
+  .rep-range-header-actions .btn-icon { width: 32px; height: 36px; padding: 4px; justify-content: center; border-radius: 8px; }
+  .rep-range-header-actions .bottom-sheet-close { position: static; transform: none; }
+  .rep-range-header-actions [aria-pressed="true"] { background: #eee; }
+  [data-rep-numeric][hidden], .rep-duration-wheels[hidden], .rep-failure-target[hidden] { display: none; }
+  .rep-failure-target { margin: 24px 0; text-align: center; }
+  .rep-failure-target strong { font-size: 28px; }
+  .rep-duration-wheels { display: grid; grid-template-columns: 1fr 16px 1fr; align-items: center; gap: 12px; margin: 20px 0; text-align: center; }
+  .rep-duration-wheels label { display: block; margin-bottom: 8px; color: var(--text2); font-size: 14px; }
+  .rep-duration-colon { font-size: 28px; padding-top: 22px; }
+  #workout-content .workout-set-row .workout-target-failure { font-size: 14px; padding-inline: 0; }
   .workout-current-target { display: block; font-size: 12px; color: var(--text2); margin-top: 5px; }
   #workout-content input[data-action="target-reps"] { cursor: pointer; }
 
